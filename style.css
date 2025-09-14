@@ -1,0 +1,234 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #f9fafb;
+}
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.sidebar .logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 0.6rem;
+  margin-bottom: 0.4rem;
+  text-decoration: none;
+  color: #333;
+  border-radius: 6px;
+}
+
+.sidebar nav a:hover {
+  background: #f1f1f1;
+}
+
+.upgrade-box {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Main area */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 0.8rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar input {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 220px;
+}
+
+.topbar button {
+  background: #000;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.topbar button:hover {
+  opacity: 0.8;
+}
+
+/* Table */
+.content {
+  padding: 1rem;
+}
+
+.content h1 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+thead {
+  background: #f9fafb;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.8rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/*------------------------------ Add Material Page ------------------------------*/
+#materialForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 equal columns */
+  gap: 20px;  /* space between fields */
+}
+
+/* Each form group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+.form-group.full {
+  grid-column: span 2; /* make this field full width */
+}
+
+/* Labels */
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+/* Inputs */
+.form-group input,
+.form-group textarea {
+  padding: 14px 16px;       /* bigger inner space */
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-size: 16px;          /* bigger font */
+  background-color: #f9fafb;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 8px rgba(76,175,80,0.3);
+  background: #fff;
+}
+
+/* Textarea takes full width */
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Buttons row */
+.form-actions {
+  grid-column: span 2; /* buttons take full row */
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+.btn.save {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+}
+.btn.cancel {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Modal box */
+.modal-content {
+  background: #fff;
+  margin: auto;
+  padding: 30px;
+  border-radius: 18px;
+  width: 700px;   /* wider for 2-column */
+  max-width: 95%;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
+  animation: fadeIn 0.3s ease-in-out;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+.modal-content h2 {
+  margin-bottom: 25px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
+/* Animation */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}

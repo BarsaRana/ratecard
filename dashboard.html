@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <style>
+    :root{
+      --bg:#f9fafb;
+      --panel:#ffffff;
+      --border:#e5e7eb;
+      --muted:#6b7280;
+      --text:#111827;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+    }
+    .shell{display:flex; min-height:100vh}
+    .sidebar{
+      flex:0 0 240px;
+      background:var(--panel);
+      border-right:1px solid var(--border);
+      display:flex; flex-direction:column;
+      padding:16px;
+    }
+    .logo{font-weight:700; margin:4px 0 16px}
+    .nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:8px; color:#374151; text-decoration:none;
+    }
+    .nav a:hover{background:#f3f4f6}
+    .pro{
+      margin-top:auto; background:#fafafa; border:1px solid var(--border);
+      border-radius:10px; padding:12px; text-align:center;
+    }
+    .main{flex:1; display:flex; flex-direction:column}
+    .topbar{
+      background:var(--panel); border-bottom:1px solid var(--border);
+      padding:12px 16px; display:flex; align-items:center; gap:12px; justify-content:space-between;
+    }
+    .search{
+      flex:0 0 340px; max-width:100%;
+      padding:9px 12px; border:1px solid #d1d5db; border-radius:8px;
+    }
+    .btn{
+      border:0; border-radius:8px; padding:9px 14px; background:#111827; color:#fff; cursor:pointer;
+    }
+    .btn:hover{opacity:.9}
+    .content{padding:24px}
+    .title{font-size:18px; font-weight:600; margin:0 0 12px}
+    .card{
+      border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--panel);
+      box-shadow:0 1px 2px rgba(0,0,0,.04);
+    }
+    table{width:100%; border-collapse:collapse}
+    thead{background:#f3f4f6}
+    th,td{padding:12px 14px; text-align:left; border-top:1px solid var(--border)}
+    thead th{border-top:0; font-size:12px; text-transform:uppercase; color:#374151}
+    .dot{width:28px; height:28px; border:1px solid var(--border); border-radius:6px; display:inline-block; background:#fff}
+    .actions{display:flex; gap:6px}
+    .act-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:32px; height:32px; border:none; border-radius:4px; cursor:pointer;
+      font-size:14px; color:#fff;
+    }
+    .view{background:#27A5C5;}
+    .edit{background:#fbbf24;}
+    .delete{background:#ef4444;}
+    .act-btn:hover{opacity:.85}
+
+
+    /* Modal styles */
+    .modal { 
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s ease-out;
+    }
+    .modal-content {
+      background: #fff;
+      margin: 40px auto;
+      padding: 0;
+      border-radius: 20px;
+      width: 900px;
+      max-width: 98vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      animation: slideUp 0.3s ease-out;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      border: 1px solid #e5e7eb;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Modal Header */
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 32px 20px 32px;
+      border-bottom: 1px solid #f3f4f6;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px 20px 0 0;
+      color: white;
+    }
+    
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.025em;
+    }
+    
+    .close { 
+      color: rgba(255, 255, 255, 0.8); 
+      position: relative; 
+      font-size: 28px; 
+      font-weight: bold; 
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .close:hover, .close:focus { 
+      color: white; 
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+    
+    /* Modal Body */
+    .modal-body {
+      padding: 32px;
+    }
+    
+    /* Form Grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    
+    .form-column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+         .form-group.full-width {
+       grid-column: 1 / -1;
+     }
+     
+     .form-label {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       font-weight: 600;
+       color: #374151;
+       font-size: 14px;
+       margin-bottom: 4px;
+     }
+     
+     /* View Modal Styles */
+     .view-grid {
+       display: grid;
+       grid-template-columns: 1fr 1fr;
+       gap: 32px;
+       margin-bottom: 32px;
+     }
+     
+     .view-column {
+       display: flex;
+       flex-direction: column;
+       gap: 24px;
+     }
+     
+     .detail-group {
+       display: flex;
+       flex-direction: column;
+       gap: 8px;
+     }
+     
+     .detail-group.full-width {
+       grid-column: 1 / -1;
+     }
+     
+     .detail-label {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       font-weight: 600;
+       color: #374151;
+       font-size: 14px;
+       margin-bottom: 4px;
+     }
+     
+     .detail-value {
+       padding: 12px 16px;
+       border: 2px solid #e5e7eb;
+       border-radius: 12px;
+       font-size: 14px;
+       background: #fafafa;
+       color: #374151;
+       min-height: 20px;
+       display: flex;
+       align-items: center;
+     }
+     
+     .detail-value.price-display {
+       font-weight: 600;
+       color: #059669;
+       background: #ecfdf5;
+       border-color: #10b981;
+     }
+     
+     .detail-value.description-text {
+       min-height: 120px;
+       line-height: 1.6;
+       white-space: pre-wrap;
+       word-wrap: break-word;
+     }
+     
+     .image-preview {
+       border: 2px solid #e5e7eb;
+       border-radius: 12px;
+       padding: 32px;
+       text-align: center;
+       background: #f9fafb;
+       min-height: 200px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+     }
+     
+     .image-placeholder {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 12px;
+       color: #6b7280;
+     }
+     
+     .image-placeholder svg {
+       color: #9ca3af;
+     }
+     
+     .image-placeholder p {
+       font-weight: 600;
+       margin: 0;
+       color: #374151;
+     }
+    
+    .label-icon {
+      font-size: 16px;
+      opacity: 0.8;
+    }
+    
+    .form-input,
+    .form-textarea {
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: #fafafa;
+      color: #374151;
+    }
+    
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: #9ca3af;
+    }
+    
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+    
+    /* Price Input Styling */
+    .price-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .currency-symbol {
+      position: absolute;
+      left: 16px;
+      color: #6b7280;
+      font-weight: 500;
+      z-index: 1;
+    }
+    
+    .price-input {
+      padding-left: 32px;
+    }
+    
+    /* Image Upload Area */
+    .image-upload-area {
+      position: relative;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      background: #f9fafb;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .image-upload-area:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .image-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: #6b7280;
+    }
+    
+    .upload-placeholder svg {
+      color: #9ca3af;
+    }
+    
+    .upload-placeholder p {
+      font-weight: 600;
+      margin: 0;
+      color: #374151;
+    }
+    
+    .upload-placeholder span {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    /* Form Actions */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 24px;
+      border-top: 1px solid #f3f4f6;
+    }
+    
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+      transform: translateY(-1px);
+    }
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .modal-content {
+        margin: 10px;
+        max-height: 95vh;
+      }
+      
+      .modal-header {
+        padding: 20px 24px 16px 24px;
+      }
+      
+      .modal-title {
+        font-size: 20px;
+      }
+      
+      .modal-body {
+        padding: 24px;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .modal-overlay {
+        padding: 10px;
+      }
+      
+      .modal-header {
+        padding: 16px 20px 12px 20px;
+      }
+      
+      .modal-body {
+        padding: 20px;
+      }
+      
+      .form-column {
+        gap: 16px;
+      }
+    }
+    @media (max-width:960px){
+      .shell{flex-direction:column}
+      .sidebar{flex:0 0 auto; border-right:0; border-bottom:1px solid var(--border)}
+      .topbar{flex-wrap:wrap; gap:8px}
+      .search{flex:1}
+      table{font-size:13px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">Decon admin</div>
+      <nav class="nav">
+        <a href="#">🏠 Home</a>
+        <a href="#">💳 Project Rate Card</a>
+        <a href="#">📦 Home</a>
+        <a href="#">👥 Profile</a>
+        <a href="#">📊 Report</a>
+        <a href="#">🔐 Logout</a>
+      </nav>
+      <div class="pro">
+        <div style="font-weight:600">User Dashboard</div>
+        <div style="font-size:12px; color:var(--muted)">Change to user dashboard</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <input class="search" placeholder="Search products..." />
+        <button class="btn" id="openModalBtn">Add Material</button>
+      </header>
+
+             <!-- Add Material Modal -->
+      <div id="modal" class="modal">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h2 class="modal-title">Add New Material</h2>
+          <span class="close" id="closeModalBtn">&times;</span>
+          </div>
+          
+          <!-- Modal Body -->
+          <div class="modal-body">
+          <form id="materialForm">
+              <div class="form-grid">
+                <!-- Left Column -->
+                <div class="form-column">
+                  <div class="form-group">
+                    <label for="id" class="form-label">
+                      <span class="label-icon">🆔</span>
+                      Material ID
+                    </label>
+                    <input type="text" id="id" name="id" class="form-input" placeholder="Enter material ID" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="salesPartNo" class="form-label">
+                      <span class="label-icon">📋</span>
+                      Sales Part Number
+                    </label>
+                    <input type="text" id="salesPartNo" name="salesPartNo" class="form-input" placeholder="Enter sales part number" required>
+                  </div>
+                  
+            <div class="form-group">
+                    <label for="site" class="form-label">
+                      <span class="label-icon">🏢</span>
+                      Site
+                    </label>
+                    <input type="text" id="site" name="site" class="form-input" placeholder="Enter site location" required>
+            </div>
+                  
+            <div class="form-group">
+                    <label for="price" class="form-label">
+                      <span class="label-icon">💰</span>
+                      Price
+                    </label>
+                    <div class="price-input-wrapper">
+                      <span class="currency-symbol">$</span>
+                      <input type="number" id="price" name="price" class="form-input price-input" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="form-column">
+                  <div class="form-group full-width">
+                    <label for="image" class="form-label">
+                      <span class="label-icon">🖼️</span>
+                      Product Image
+                    </label>
+                    <div class="image-upload-area">
+                      <input type="file" id="image" name="image" class="image-input" accept="image/*">
+                      <div class="upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                          <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21,15 16,10 5,21"></polyline>
+                        </svg>
+                        <p>Click to upload image</p>
+                        <span>PNG, JPG up to 10MB</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group full-width">
+                    <label for="description" class="form-label">
+                      <span class="label-icon">📝</span>
+                      Description
+                    </label>
+                    <textarea id="description" name="description" class="form-textarea" placeholder="Enter detailed description of the material..." rows="6" required></textarea>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17,21 17,13 7,13 7,21"></polyline>
+                    <polyline points="7,3 7,8 15,8"></polyline>
+                  </svg>
+                  Save Material
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Material Modal -->
+      <div id="editModal" class="modal">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h2 class="modal-title">Edit Material</h2>
+            <span class="close" id="closeEditModalBtn">&times;</span>
+            </div>
+          
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <form id="editMaterialForm">
+              <div class="form-grid">
+                <!-- Left Column -->
+                <div class="form-column">
+                  <div class="form-group">
+                    <label for="editId" class="form-label">
+                      <span class="label-icon">🆔</span>
+                      Material ID
+                    </label>
+                    <input type="text" id="editId" name="id" class="form-input" placeholder="Enter material ID" required>
+            </div>
+                  
+                  <div class="form-group">
+                    <label for="editSalesPartNo" class="form-label">
+                      <span class="label-icon">📋</span>
+                      Sales Part Number
+                    </label>
+                    <input type="text" id="editSalesPartNo" name="salesPartNo" class="form-input" placeholder="Enter sales part number" required>
+            </div>
+                  
+            <div class="form-group">
+                    <label for="editSite" class="form-label">
+                      <span class="label-icon">🏢</span>
+                      Site
+                    </label>
+                    <input type="text" id="editSite" name="site" class="form-input" placeholder="Enter site location" required>
+            </div>
+                  
+            <div class="form-group">
+                    <label for="editPrice" class="form-label">
+                      <span class="label-icon">💰</span>
+                      Price
+                    </label>
+                    <div class="price-input-wrapper">
+                      <span class="currency-symbol">$</span>
+                      <input type="number" id="editPrice" name="price" class="form-input price-input" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="form-column">
+                  <div class="form-group full-width">
+                    <label for="editImage" class="form-label">
+                      <span class="label-icon">🖼️</span>
+                      Product Image
+                    </label>
+                    <div class="image-upload-area">
+                      <input type="file" id="editImage" name="image" class="image-input" accept="image/*">
+                      <div class="upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                          <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21,15 16,10 5,21"></polyline>
+                        </svg>
+                        <p>Click to upload image</p>
+                        <span>PNG, JPG up to 10MB</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group full-width">
+                    <label for="editDescription" class="form-label">
+                      <span class="label-icon">📝</span>
+                      Description
+                    </label>
+                    <textarea id="editDescription" name="description" class="form-textarea" placeholder="Enter detailed description of the material..." rows="6" required></textarea>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  Update Material
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Material Modal -->
+      <div id="viewModal" class="modal">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h2 class="modal-title">Material Details</h2>
+            <span class="close" id="closeViewModalBtn">&times;</span>
+          </div>
+          
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <div class="view-grid">
+              <!-- Left Column -->
+              <div class="view-column">
+                <div class="detail-group">
+                  <label class="detail-label">
+                    <span class="label-icon">🆔</span>
+                    Material ID
+                  </label>
+                  <div class="detail-value" id="viewId">-</div>
+                </div>
+                
+                <div class="detail-group">
+                  <label class="detail-label">
+                    <span class="label-icon">📋</span>
+                    Sales Part Number
+                  </label>
+                  <div class="detail-value" id="viewSalesPartNo">-</div>
+                </div>
+                
+                <div class="detail-group">
+                  <label class="detail-label">
+                    <span class="label-icon">🏢</span>
+                    Site
+                  </label>
+                  <div class="detail-value" id="viewSite">-</div>
+                </div>
+                
+                <div class="detail-group">
+                  <label class="detail-label">
+                    <span class="label-icon">💰</span>
+                    Price
+                  </label>
+                  <div class="detail-value price-display" id="viewPrice">-</div>
+                </div>
+              </div>
+              
+              <!-- Right Column -->
+              <div class="view-column">
+                <div class="detail-group full-width">
+                  <label class="detail-label">
+                    <span class="label-icon">🖼️</span>
+                    Product Image
+                  </label>
+                  <div class="image-preview">
+                    <div class="image-placeholder">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                        <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21,15 16,10 5,21"></polyline>
+                      </svg>
+                      <p>No image available</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="detail-group full-width">
+                  <label class="detail-label">
+                    <span class="label-icon">📝</span>
+                    Description
+                  </label>
+                  <div class="detail-value description-text" id="viewDescription">-</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Modal Actions -->
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="closeViewBtn">Close</button>
+              <button type="button" class="btn btn-primary" id="editFromViewBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Material
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="content">
+        <h1 class="title">Sales Part</h1>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Sales Part No</th>
+                <th>Description</th>
+                <th>Site</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>M01</td>
+                <td><span class="dot"></span></td>
+                <td>10-DG094</td>
+                <td>10kVA Perkins Enclosed Generator (Elcos)</td>
+                <td>3DT01</td>
+                <td>$4,545.45</td>
+                <td>
+                  <div class="actions">
+                    <button class="act-btn view" data-id="M01">👁</button>
+                    <button class="act-btn edit" data-id="M01">✏</button>
+                    <button class="act-btn delete" data-id="M01">🗑</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>M02</td>
+                <td><span class="dot"></span></td>
+                <td>10-DG095</td>
+                <td>10kVA Perkins Enclosed Generator (Elcos)</td>
+                <td>3DT01</td>
+                <td>$4,545.45</td>
+                <td>
+                  <div class="actions">
+                    <button class="act-btn view" data-id="M02">👁</button>
+                    <button class="act-btn edit" data-id="M02">✏</button>
+                    <button class="act-btn delete" data-id="M02">🗑</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>M03</td>
+                <td><span class="dot"></span></td>
+                <td>2-1671163-1</td>
+                <td>12 PORT CONSOLIDATION PORT</td>
+                <td>3DT01</td>
+                <td>$132.00</td>
+                <td>
+                  <div class="actions">
+                    <button class="act-btn view" data-id="M03">👁</button>
+                    <button class="act-btn edit" data-id="M03">✏</button>
+                    <button class="act-btn delete" data-id="M03">🗑</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>M04</td>
+                <td><span class="dot"></span></td>
+                <td>ATCB-B01-002</td>
+                <td>AISG RET Control Cable 2m</td>
+                <td>3DT01</td>
+                <td>$37.32</td>
+                <td>
+                  <div class="actions">
+                    <button class="act-btn view" data-id="M04">👁</button>
+                    <button class="act-btn edit" data-id="M04">✏</button>
+                    <button class="act-btn delete" data-id="M04">🗑</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>M05</td>
+                <td><span class="dot"></span></td>
+                <td>ATCB-B01-030</td>
+                <td>AISG RET Control Cable 30m</td>
+                <td>3DT01</td>
+                <td>$174.73</td>
+                <td>
+                  <div class="actions">
+                    <button class="act-btn view" data-id="M05">👁</button>
+                    <button class="act-btn edit" data-id="M05">✏</button>
+                    <button class="act-btn delete" data-id="M05">🗑</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Example Jinja2 user list -->
+        <ul>
+        {% for user in users %}
+          <li>{{ user.name }}</li>
+        {% endfor %}
+        </ul>
+      </section>
+    </main>
+  </div>
+  <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+          console.log('DOM loaded, initializing...');
+          
+                     // Get modal elements
+    var modal = document.getElementById("modal");
+           var editModal = document.getElementById("editModal");
+           var viewModal = document.getElementById("viewModal");
+          
+                     // Get button elements
+    var openBtn = document.getElementById("openModalBtn");
+    var closeBtn = document.getElementById("closeModalBtn");
+    var cancelBtn = document.getElementById("cancelBtn");
+           var closeEditBtn = document.getElementById("closeEditModalBtn");
+           var cancelEditBtn = document.getElementById("cancelEditBtn");
+           var closeViewBtn = document.getElementById("closeViewModalBtn");
+           var closeViewBtn2 = document.getElementById("closeViewBtn");
+           var editFromViewBtn = document.getElementById("editFromViewBtn");
+
+          // Sample data for demonstration
+          const materialsData = [
+            {
+              id: 'M01',
+              salesPartNo: '10-DG094',
+              description: '10kVA Perkins Enclosed Generator (Elcos)',
+              site: '3DT01',
+              price: '4545.45'
+            },
+            {
+              id: 'M02',
+              salesPartNo: '10-DG095',
+              description: '10kVA Perkins Enclosed Generator (Elcos)',
+              site: '3DT01',
+              price: '4545.45'
+            },
+            {
+              id: 'M03',
+              salesPartNo: '2-1671163-1',
+              description: '12 PORT CONSOLIDATION PORT',
+              site: '3DT01',
+              price: '132.00'
+            },
+            {
+              id: 'M04',
+              salesPartNo: 'ATCB-B01-002',
+              description: 'AISG RET Control Cable 2m',
+              site: '3DT01',
+              price: '37.32'
+            },
+            {
+              id: 'M05',
+              salesPartNo: 'ATCB-B01-030',
+              description: 'AISG RET Control Cable 30m',
+              site: '3DT01',
+              price: '174.73'
+            }
+          ];
+
+                     // Function to open edit modal with data
+           function openEditModal(materialId) {
+             console.log('Opening edit modal for:', materialId);
+             const material = materialsData.find(m => m.id === materialId);
+             if (material) {
+               console.log('Found material:', material);
+               // Fill the form with existing data
+               document.getElementById('editId').value = material.id;
+               document.getElementById('editSalesPartNo').value = material.salesPartNo;
+               document.getElementById('editSite').value = material.site;
+               document.getElementById('editPrice').value = material.price;
+               document.getElementById('editDescription').value = material.description;
+               
+               // Show the modal
+               editModal.style.display = "block";
+             } else {
+               console.log('Material not found for ID:', materialId);
+             }
+           }
+
+           // Function to open view modal with data
+           function openViewModal(materialId) {
+             console.log('Opening view modal for:', materialId);
+             const material = materialsData.find(m => m.id === materialId);
+             if (material) {
+               console.log('Found material for view:', material);
+               // Fill the view with existing data
+               document.getElementById('viewId').textContent = material.id;
+               document.getElementById('viewSalesPartNo').textContent = material.salesPartNo;
+               document.getElementById('viewSite').textContent = material.site;
+               document.getElementById('viewPrice').textContent = `$${parseFloat(material.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+               document.getElementById('viewDescription').textContent = material.description;
+               
+               // Show the modal
+               viewModal.style.display = "block";
+             } else {
+               console.log('Material not found for ID:', materialId);
+             }
+           }
+
+                     // Setup edit buttons
+           function setupEditButtons() {
+             console.log('Setting up edit buttons...');
+             
+             // Get all edit buttons
+             const editButtons = document.querySelectorAll('button.act-btn.edit');
+             console.log('Found edit buttons:', editButtons.length);
+             
+             editButtons.forEach((button) => {
+               const materialId = button.getAttribute('data-id');
+               console.log('Setting up edit button for material:', materialId);
+               
+               // Remove any existing listeners
+               button.removeEventListener('click', button.editClickHandler);
+               
+               // Create new click handler
+               button.editClickHandler = function(e) {
+                 e.preventDefault();
+                 e.stopPropagation();
+                 console.log('Edit button clicked for material:', materialId);
+                 
+                 if (materialId) {
+                   openEditModal(materialId);
+                 } else {
+                   console.error('No material ID found for button');
+                 }
+               };
+               
+               // Add click listener
+               button.addEventListener('click', button.editClickHandler);
+             });
+           }
+
+           // Setup view buttons
+           function setupViewButtons() {
+             console.log('Setting up view buttons...');
+             
+             // Get all view buttons
+             const viewButtons = document.querySelectorAll('button.act-btn.view');
+             console.log('Found view buttons:', viewButtons.length);
+             
+             viewButtons.forEach((button) => {
+               const materialId = button.getAttribute('data-id');
+               console.log('Setting up view button for material:', materialId);
+               
+               // Remove any existing listeners
+               button.removeEventListener('click', button.viewClickHandler);
+               
+               // Create new click handler
+               button.viewClickHandler = function(e) {
+      e.preventDefault();
+                 e.stopPropagation();
+                 console.log('View button clicked for material:', materialId);
+                 
+                 if (materialId) {
+                   openViewModal(materialId);
+                 } else {
+                   console.error('No material ID found for button');
+                 }
+               };
+               
+               // Add click listener
+               button.addEventListener('click', button.viewClickHandler);
+             });
+           }
+
+          // Add Material Modal event listeners
+          openBtn.addEventListener('click', function() { 
+            console.log('Add modal opened');
+            modal.style.display = "block"; 
+          });
+          
+          closeBtn.addEventListener('click', function() { 
+            console.log('Add modal closed');
+            modal.style.display = "none"; 
+          });
+          
+          cancelBtn.addEventListener('click', function() { 
+            console.log('Add modal cancelled');
+            modal.style.display = "none"; 
+          });
+
+                     // Edit Material Modal event listeners
+           closeEditBtn.addEventListener('click', function() { 
+             console.log('Edit modal closed');
+             editModal.style.display = "none"; 
+           });
+           
+           cancelEditBtn.addEventListener('click', function() { 
+             console.log('Edit modal cancelled');
+             editModal.style.display = "none"; 
+           });
+
+           // View Material Modal event listeners
+           closeViewBtn.addEventListener('click', function() { 
+             console.log('View modal closed');
+             viewModal.style.display = "none"; 
+           });
+           
+           closeViewBtn2.addEventListener('click', function() { 
+             console.log('View modal closed by close button');
+             viewModal.style.display = "none"; 
+           });
+
+           // Edit from view button
+           editFromViewBtn.addEventListener('click', function() { 
+             console.log('Edit from view button clicked');
+             viewModal.style.display = "none";
+             // Get current material ID from view modal
+             const currentMaterialId = document.getElementById('viewId').textContent;
+             if (currentMaterialId && currentMaterialId !== '-') {
+               openEditModal(currentMaterialId);
+             }
+           });
+
+                     // Global click handler for all modals
+           window.addEventListener('click', function(event) {
+             if (event.target == modal) { 
+               console.log('Add modal closed by overlay');
+        modal.style.display = "none";
+             }
+             if (event.target == editModal) { 
+               console.log('Edit modal closed by overlay');
+               editModal.style.display = "none"; 
+             }
+             if (event.target == viewModal) { 
+               console.log('View modal closed by overlay');
+               viewModal.style.display = "none"; 
+             }
+           });
+
+                     // Setup buttons
+           setupEditButtons();
+           setupViewButtons();
+
+          // Add Material Form submit logic
+          document.getElementById("materialForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            console.log('Add form submitted');
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            console.log('Form data:', data);
+            
+            // For demonstration, just show success message
+            alert("Material added successfully!");
+            modal.style.display = "none";
+            e.target.reset();
+          });
+
+          // Edit Material Form submit logic
+          document.getElementById("editMaterialForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            console.log('Edit form submitted');
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            console.log('Edit form data:', data);
+            
+            // For demonstration, just show success message
+            alert("Material updated successfully!");
+            editModal.style.display = "none";
+            e.target.reset();
+          });
+
+                     console.log('Initialization complete!');
+           
+           // Final setup check
+           setTimeout(() => {
+             console.log('=== FINAL CHECK ===');
+             console.log('Edit buttons found:', document.querySelectorAll('button.act-btn.edit').length);
+             console.log('View buttons found:', document.querySelectorAll('button.act-btn.view').length);
+             
+             // Check if buttons have data-id attributes
+             const editButtons = document.querySelectorAll('button.act-btn.edit');
+             const viewButtons = document.querySelectorAll('button.act-btn.view');
+             
+             console.log('Edit buttons with data-id:', Array.from(editButtons).filter(btn => btn.hasAttribute('data-id')).length);
+             console.log('View buttons with data-id:', Array.from(viewButtons).filter(btn => btn.hasAttribute('data-id')).length);
+             
+             // Show material IDs
+             console.log('Material IDs in edit buttons:', Array.from(editButtons).map(btn => btn.getAttribute('data-id')));
+             console.log('Material IDs in view buttons:', Array.from(viewButtons).map(btn => btn.getAttribute('data-id')));
+           }, 500);
+    });
+  </script>
+</body>
+</html>
